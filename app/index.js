@@ -4,6 +4,7 @@ require('dotenv').config()
 const Transaction = require('./models/Transaction.js')
 const { mongoose } = require('mongoose')
 
+
 // var bodyParser = require('body-parser')
 
 const app = express()
@@ -28,4 +29,18 @@ app.get('/api/transactions',async (req,res)=>{
      res.json(transactions)
 })
 
+app.delete('/api/delete', async (req, res) => {
+    await mongoose.connect(process.env.MONGO_URL);
+    console.log(req.body);
+    try {
+      const deletedTransaction = await Transaction.findOneAndDelete({ _id: req.body.id });
+      if (deletedTransaction) {
+        res.json({ message: 'Transaction deleted successfully' });
+      } else {
+        res.status(404).json({ error: 'Transaction not found' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 app.listen(4000)
